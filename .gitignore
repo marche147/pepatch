@@ -1,0 +1,7 @@
+*.pyc
+*.pyo
+*.swp
+test.py
+.devenv/
+test_binaries/
+
