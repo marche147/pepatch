@@ -5272,6 +5272,18 @@ class PE(object):
 
         return True
 
+    ##### PATCH START #####
+    def get_bytes_at_rva(self, rva, nbytes):
+        offset = self.get_physical_by_rva(rva)
+        if not offset:
+            raise IndexError("Could not get corresponding offset by RVA")
+        return self.get_bytes_at_offset(offset, nbytes)
+
+    def get_bytes_at_offset(self, offset, nbytes):
+        if offset >= 0 and offset + nbytes < len(self.__data__):
+            return self.__data__[offset:offset+nbytes]
+        raise IndexError("Offset out of bound")
+    ###### PATCH END ###### 
 
     def merge_modified_section_data(self):
         """Update the PE image content with any individual section data that has been modified."""
