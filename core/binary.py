@@ -33,7 +33,7 @@ class Binary(object):
         section.Characteristics |= (pefile.SECTION_CHARACTERISTICS['IMAGE_SCN_MEM_READ'] + pefile.SECTION_CHARACTERISTICS['IMAGE_SCN_MEM_WRITE'] + pefile.SECTION_CHARACTERISTICS['IMAGE_SCN_MEM_EXECUTE'])
         self.patch_foffset = section.SizeOfRawData + section.PointerToRawData
         section.SizeOfRawData += self.roundup(self.DEFAULT_AMPLIFY_SIZE, self.file_alignment)
-        section.Misc_VirtualSize = section.SizeOfRawData
+        #section.Misc_VirtualSize = section.SizeOfRawData
         self.patch_alloc = self.patch_foffset
 
         return

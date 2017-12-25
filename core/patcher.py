@@ -21,7 +21,8 @@ class Patcher(object):
         if kwargs.has_key("base"):
             baseaddr = kwargs["base"]
         if kwargs.has_key("asm"):
-            data = self.assembler.asm(kwargs["asm"], addr=baseaddr)
+            code = self.linker.preasm(kwargs['asm'])
+            data = self.assembler.asm(code, addr=baseaddr)
         elif kwargs.has_key("hex"):
             data = kwargs["hex"].decode('hex')
         elif kwargs.has_key("raw"):
@@ -43,5 +44,10 @@ class Patcher(object):
         log.info("Patching @ 0x%x"%(va))
         data = self._compile(base=va, *args, **kwargs)
         self.binary.writeva(va, data)
+        return True
+
+    def define(self, symbol, va):
+        log.info("Defined %s @ 0x%x"%(symbol, va))
+        self.linker.addsym(symbol, va)
         return True
 
