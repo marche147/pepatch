@@ -30,7 +30,7 @@ def clean(asm):
 
 def compile(code, arch='x86', extra_cflags=[]):
     global compiler_version
-    cflags = ['-nostdlib', '-mno-sse', '-masm=intel', '-std=c99', '-fno-stack-protector', '-fno-jump-tables', '-fno-pic', '-fno-asynchronous-unwind-tables']
+    cflags = ['-nostdlib', '-mno-sse', '-masm=intel', '-std=c99', '-fno-stack-protector', '-fno-jump-tables', '-fno-pic', '-fno-asynchronous-unwind-tables', '-Wno-incompatible-library-redeclaration']
 
     if not compiler_version:
         p = subprocess.Popen(["gcc", "--version"], stdout=subprocess.PIPE, stderr=DEVNULL)

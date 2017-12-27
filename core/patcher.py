@@ -2,6 +2,7 @@
 from binary import *
 from assemble import *
 from linker import *
+import util
 import compiler
 import log
 
@@ -10,6 +11,8 @@ class Patcher(object):
     def __init__(self, filename):
         self.binary = Binary(filename)
         self.linker = Linker(self.binary.arch, self)
+
+        util.declare(self.linker)
         return
 
     def save(self, filename):

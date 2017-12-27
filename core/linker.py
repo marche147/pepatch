@@ -90,8 +90,8 @@ class Linker(object):
         asm = self.preasm(compiler.compile(ccode, self.arch, extra_cflags))
         return asm
 
-    def decl(self, ccodes, header):
-        self.addheader(header)
+    def decl(self, ccodes, header=''):
+        if header: self.addheader(header)
         matches = re.findall(funcdef_re % '\w+', ccodes, re.MULTILINE)
         for match in matches:
             code = match[0]
