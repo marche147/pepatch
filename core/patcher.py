@@ -2,14 +2,14 @@
 from binary import *
 from assemble import *
 from linker import *
+import compiler
 import log
 
 class Patcher(object):
 
     def __init__(self, filename):
         self.binary = Binary(filename)
-        self.assembler = assembler(self.binary.arch)
-        self.linker = Linker()
+        self.linker = Linker(self.binary.arch, self)
         return
 
     def save(self, filename):
@@ -20,17 +20,25 @@ class Patcher(object):
         baseaddr = self.binary.next_alloc
         if kwargs.has_key("base"):
             baseaddr = kwargs["base"]
+
         if kwargs.has_key("asm"):
             code = self.linker.preasm(kwargs['asm'])
-            data = self.assembler.asm(code, addr=baseaddr)
+            if not kwargs.has_key("base"): baseaddr = self.binary.next_alloc    # if we don't specify a base addr, we need to update baseaddr after linker preasm
+            data = self.linker.assembler.asm(code, addr=baseaddr)
         elif kwargs.has_key("hex"):
             data = kwargs["hex"].decode('hex')
         elif kwargs.has_key("raw"):
             data = kwargs["raw"]
         elif kwargs.has_key("jmp"):
-            data = self.assembler.jmp(kwargs["jmp"], addr=baseaddr)
+            data = self.linker.assembler.jmp(kwargs["jmp"], addr=baseaddr)
         elif kwargs.has_key("call"):
-            data = self.assembler.call(kwargs["call"], addr=baseaddr)
+            data = self.linker.assembler.call(kwargs["call"], addr=baseaddr)
+        elif kwargs.has_key("c"):
+            code = kwargs["c"]
+            asm = self.linker.compile(code)
+            if not kwargs.has_key("base"): baseaddr = self.binary.next_alloc
+            data = self.linker.assembler.asm(asm, addr=baseaddr)
+
         return bytes(data)
 
     def inject(self, *args, **kwargs):
@@ -50,4 +58,7 @@ class Patcher(object):
         log.info("Defined %s @ 0x%x"%(symbol, va))
         self.linker.addsym(symbol, va)
         return True
+
+    def declare(self, ccodes, header):
+        return self.linker.decl(ccodes, header)
 
