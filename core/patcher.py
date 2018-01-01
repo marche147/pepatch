@@ -8,9 +8,9 @@ import log
 
 class Patcher(object):
 
-    def __init__(self, filename):
+    def __init__(self, filename, cflags=[]):
         self.binary = Binary(filename)
-        self.linker = Linker(self.binary.arch, self)
+        self.linker = Linker(self.binary.arch, self, cflags)
 
         util.declare(self.linker)
         return

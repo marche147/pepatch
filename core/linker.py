@@ -8,12 +8,13 @@ funcdef_re = r'^(?P<all>(?P<desc>[^\s].+?(?P<name>%s)(?P<args>\(.*?\)))\s*{(?P<b
 
 class Linker(object):
 
-    def __init__(self, arch, patcher):
+    def __init__(self, arch, patcher, cflags=[]):
         self.symtable = {}  # dict (key: function name, value: function address)
         self.header = []
         self.declare = {}   # declared c functions, [name] = code
         self.arch = arch
         self.assembler = assembler(arch)
+        self.extra_cflags = cflags
         self.patcher = patcher
         return
 
@@ -62,7 +63,7 @@ class Linker(object):
             result.append(line)
         return '\n'.join(result)
 
-    def compile_dependecy(self, sym, code, extra_cflags=[]):
+    def compile_dependecy(self, sym, code):
         code = self.prec(code)
         match = re.search(funcdef_re % sym, code, re.MULTILINE)
         if not match:
@@ -71,14 +72,14 @@ class Linker(object):
         result = match.groupdict()
         code = result["all"]
         ccode = "\n".join(self.header) + code
-        asm = self.preasm(compiler.compile(ccode, self.arch, extra_cflags))
+        asm = self.preasm(compiler.compile(ccode, self.arch, self.extra_cflags))
         bincode = self.assembler.asm(asm, addr=self.patcher.binary.next_alloc)
         addr = self.patcher.inject(raw=bincode)
         self.addsym(sym, addr)
         log.success("Resolved %s @ 0x%x" % (sym, addr))
         return addr
 
-    def compile(self, code, extra_cflags=[]):
+    def compile(self, code):
         code = self.prec(code)
         match = re.search(funcdef_re % '\w+', code, re.MULTILINE)
         if not match:
@@ -87,7 +88,7 @@ class Linker(object):
         result = match.groupdict()
         code = result["all"]
         ccode = '\n'.join(self.header) + code
-        asm = self.preasm(compiler.compile(ccode, self.arch, extra_cflags))
+        asm = self.preasm(compiler.compile(ccode, self.arch, self.extra_cflags))
         return asm
 
     def decl(self, ccodes, header=''):
